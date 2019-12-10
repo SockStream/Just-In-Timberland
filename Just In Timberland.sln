@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Just In Timberland", "Just In Timberland.csproj", "{56DEF2EC-2D6C-498B-ADE7-3DEA527B3194}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Just In Timberland", "Just In Timberland.csproj", "{56DEF2EC-2D6C-498B-ADE7-3DEA527B3194}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "..\UnitTest\UnitTest.csproj", "{4E1F16C6-5DAB-4A02-B537-79CE9A6E1859}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{56DEF2EC-2D6C-498B-ADE7-3DEA527B3194}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56DEF2EC-2D6C-498B-ADE7-3DEA527B3194}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56DEF2EC-2D6C-498B-ADE7-3DEA527B3194}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E1F16C6-5DAB-4A02-B537-79CE9A6E1859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E1F16C6-5DAB-4A02-B537-79CE9A6E1859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E1F16C6-5DAB-4A02-B537-79CE9A6E1859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E1F16C6-5DAB-4A02-B537-79CE9A6E1859}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
