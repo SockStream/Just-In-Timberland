@@ -439,12 +439,12 @@ namespace JustInTimberland
                 if (bucheron == Ennemi1 || bucheron == Ennemi2)  //tester s'ils ont bougé depuis le dernier tour
                 {
                     bucheron.PasBouge = false;
-                    if (bucheron.PrecedentePosition != null && bucheron._X == bucheron.PrecedentePosition.X && bucheron._Y == bucheron.PrecedentePosition.Y && !( bucheron._X == 29 && bucheron._Y == 7))
+                    if (bucheron.PrecedentePosition != null && bucheron._X == bucheron.PrecedentePosition.X && bucheron._Y == bucheron.PrecedentePosition.Y && bucheron._X != 29 && bucheron._Y != 7)
                     {
                         bucheron.PasBouge = true;
                         Console.Error.WriteLine("PAS BOUGE : " + bucheron._X + "," + bucheron._Y);
                     }
-                    bucheron.PrecedentePosition = new CelluleInconnue(x,y);
+                    bucheron.PrecedentePosition = new CelluleInconnue(bucheron._X, bucheron._Y);
                 }
 
                 bucheron._X = x;
@@ -1311,7 +1311,7 @@ namespace JustInTimberland
                 }
                 action = PathFinding_Cible();
             }
-            if (_bucheron.Energy <= 50 && !_bucheron.JeVole && ! _bucheron.JeCoupe && Carte.GetInstance().NbTourMax - Carte.GetInstance().NbTour >= Epsilon2)
+            if (_bucheron.Energy == 0 && !_bucheron.JeVole && ! _bucheron.JeCoupe && Carte.GetInstance().NbTourMax - Carte.GetInstance().NbTour >= Epsilon2)
             {
                 JeTrouveLePlusRentable(typeof(BonusEnergie));
                 if (_bucheron.cible == null)

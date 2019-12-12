@@ -238,7 +238,7 @@ namespace JustInTimberland
 
     public class BonusCoupe : Bonus
     {
-        public int AxeBonus { get; internal set; }
+        public int NbTours { get; internal set; }
 
         public BonusCoupe(int x, int y) : base(x, y)
         {
@@ -279,8 +279,6 @@ namespace JustInTimberland
         public bool CoupeParMoi { get; internal set; }
         public bool Entamme { get; internal set; }
         private bool _SeFaitDecouper;
-        public int Risque = 0;
-
         public bool SeFaitDecouper {
             get => _SeFaitDecouper;
             set
@@ -327,7 +325,6 @@ namespace JustInTimberland
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int NbTour { get; internal set; }
-        public List<Cellule> ListePointsASurveiller = new List<Cellule>();
 
         public int NbTourMax = 200;
 
@@ -375,6 +372,7 @@ namespace JustInTimberland
 
         public void MettreAJourBucheron(int id, int playerId, int x, int y, int energy, int axeBonus, int inventory)
         {
+            Console.Error.WriteLine("mise a jour Bucheron : " + id + "," + playerId);
             //ce sont les miens
             AbstractBucheron bucheron;
             if (playerId == 0)
@@ -436,17 +434,6 @@ namespace JustInTimberland
             //mise a jour effective
             if (bucheron != null)
             {
-                if (bucheron == Ennemi1 || bucheron == Ennemi2)  //tester s'ils ont bougé depuis le dernier tour
-                {
-                    bucheron.PasBouge = false;
-                    if (bucheron.PrecedentePosition != null && bucheron._X == bucheron.PrecedentePosition.X && bucheron._Y == bucheron.PrecedentePosition.Y && !( bucheron._X == 29 && bucheron._Y == 7))
-                    {
-                        bucheron.PasBouge = true;
-                        Console.Error.WriteLine("PAS BOUGE : " + bucheron._X + "," + bucheron._Y);
-                    }
-                    bucheron.PrecedentePosition = new CelluleInconnue(x,y);
-                }
-
                 bucheron._X = x;
                 bucheron._Y = y;
                 bucheron.Energy = energy;
@@ -518,7 +505,7 @@ namespace JustInTimberland
                     if (cell == null)
                     {
                         cell = new BonusCoupe(x,y);
-                        ((BonusCoupe)cell).AxeBonus = amount;
+                        ((BonusCoupe)cell).NbTours = amount;
                     }
                     ((BonusCoupe)cell).Visible = true;
                     break;
@@ -582,9 +569,8 @@ namespace JustInTimberland
         internal void GererSecuriteTags()
         {
             int Epsilon1 = 100;
-            int Epsilon2 = 50;
+            int Epsilon2 = 30;
             bool TagExiste = false;
-            bool QueDuRisque = true;
             foreach (Cellule cellule in tableau)
             {
                 if (cellule != null && cellule is Arbre)
@@ -593,22 +579,8 @@ namespace JustInTimberland
                     {
                         TagExiste = true;
                     }
-                    if (((Arbre)cellule).Risque == 0 && !((Arbre)cellule).Tag)
-                    {
-                        QueDuRisque = false;
-                    }
                 }
             }
-            
-            if (QueDuRisque)
-            {
-                UtiliserArbreTag = true;
-            }
-            else
-            {
-                UtiliserArbreTag = false;
-            }
-
             if (!TagExiste && NbTour > Epsilon1)
             {
                 UtiliserArbreTag = true;
@@ -624,47 +596,6 @@ namespace JustInTimberland
                 UtiliserArbreTag = true;
             }
         }
-
-        internal void GererRisque(AbstractBucheron bucheron)
-        {
-            List<Cellule> listeVoisins = new List<Cellule>();
-            if (bucheron.PrecedentePosition.X - 1 >= 0)
-            {
-                Cellule voisinGauche = new CelluleInconnue(bucheron.PrecedentePosition.X - 1, bucheron.PrecedentePosition.Y);
-                listeVoisins.Add(voisinGauche);
-            }
-            if (bucheron.PrecedentePosition.X + 1 < Width)
-            {
-                Cellule voisinDroit = new CelluleInconnue(bucheron.PrecedentePosition.X + 1, bucheron.PrecedentePosition.Y);
-                listeVoisins.Add(voisinDroit);
-            }
-            if (bucheron.PrecedentePosition.Y - 1 >= 0)
-            {
-                Cellule voisinHaut = new CelluleInconnue(bucheron.PrecedentePosition.X, bucheron.PrecedentePosition.Y - 1);
-                listeVoisins.Add(voisinHaut);
-            }
-            if (bucheron.PrecedentePosition.Y + 1 < Height)
-            {
-                Cellule voisinBas = new CelluleInconnue(bucheron.PrecedentePosition.X, bucheron.PrecedentePosition.Y + 1);
-                listeVoisins.Add(voisinBas);
-            }
-
-            foreach(Cellule voisin in listeVoisins)
-            {
-                Cellule celluleTestee = tableau[voisin.X, voisin.Y];
-                if (celluleTestee != null && celluleTestee is Arbre)
-                {
-                    if (!((Arbre)celluleTestee).Entamme)
-                    {
-                        ((Arbre)celluleTestee).Risque = 1000;
-                    }
-                }
-                if (celluleTestee == null && ListePointsASurveiller.Where(v => v.X == voisin.X && v.Y == voisin.Y).Count() == 0)
-                {
-                    ListePointsASurveiller.Add(voisin);
-                }
-            }
-        }
     }
 
     public abstract class AbstractBucheron
@@ -677,8 +608,6 @@ namespace JustInTimberland
         public int inventory { get; set; }
         public int Immobile { get; internal set; }
         public Cellule CelluleOrigine { get; internal set; }
-        public CelluleInconnue PrecedentePosition { get; internal set; }
-        public bool PasBouge { get; internal set; }
 
         /*private int NombreDeToursPourRetournerAuCamionDepuis(int X, int Y)
         {
@@ -865,7 +794,7 @@ namespace JustInTimberland
         {
             if (cible != null)
             {
-                Console.Error.WriteLine(nom +  ": cible -> " + cible.X + "," + cible.Y);
+                Console.Error.WriteLine("cible : " + cible.X + "," + cible.Y);
                 cible = Carte.GetInstance().tableau[cible.X, cible.Y];
                 if (cible != null && cible is Obstacle)
                 {
@@ -877,50 +806,10 @@ namespace JustInTimberland
                 JeCoupe = false;
                 JeVole = false;
             }
-
-            List<Cellule> ListeSansRisque = new List<Cellule>();
-            foreach (Cellule celluleRisque in Carte.GetInstance().ListePointsASurveiller)
-            {
-                Cellule cellule = Carte.GetInstance().tableau[celluleRisque.X, celluleRisque.Y];
-                if (cellule == null) //soit je ne suis pas à distance, soit je ne sais pas
-                {
-                    if (Math.Abs(_X - celluleRisque.X) + Math.Abs(_Y - celluleRisque.Y) <= 5)//si je suis à distance ==> il n'y a rien
-                    {
-                        ListeSansRisque.Add(celluleRisque);
-                    }
-                    else
-                    {
-                        //je ne peux pas me prononcer => je la garde dans ma liste
-                    }
-                }
-                else
-                {
-                    if (cellule is Arbre)
-                    {
-                        ((Arbre)cellule).Risque = 1000;
-                    }
-                    else
-                    {
-                        ListeSansRisque.Add(celluleRisque);
-                    }
-                }
-            }
-
-            foreach(Cellule cellule in ListeSansRisque)
-            {
-                Carte.GetInstance().ListePointsASurveiller.Remove(cellule);
-                Console.Error.WriteLine(nom + ": RETIRE " + cellule.X + "," + cellule.Y);
-            }
-            Console.Error.WriteLine("Points a surveiller : ");
-            foreach (Cellule cellule in Carte.GetInstance().ListePointsASurveiller)
-            {
-                Console.Error.WriteLine(" ==> " + cellule.X + "," + cellule.Y);
-            }
-
-            foreach (GestionAction gestion in ListeDesActions)
+            foreach(GestionAction gestion in ListeDesActions)
             {
                 String Denomination = gestion.Denomination;
-                //Console.Error.WriteLine(nom + ": " + Denomination);
+                Console.Error.WriteLine(nom + ": " + Denomination);
                 String action = gestion.DefinirAction();
                 if (action != String.Empty)
                 {
@@ -971,7 +860,6 @@ namespace JustInTimberland
             ListeDesActions.Add(new GestionActionEnergie(this));
             ListeDesActions.Add(new GestionActionVol(this));
             ListeDesActions.Add(new GestionActionTag(this));
-            ListeDesActions.Add(new GestionActionBonusHache(this));
             ListeDesActions.Add(new GestionActionBucheron(this));
             ListeDesActions.Add(new GestionActionExploration(this));
         }
@@ -1085,7 +973,7 @@ namespace JustInTimberland
         {
             if (Type.Equals(type, typeof(Arbre)))
             {
-                List<Tuple<Cellule, int>> ListeDesPositions = new List<Tuple<Cellule, int>>();
+                List<int[]> ListeDesPositions = new List<int[]>();
                 for (int i = 0; i < Carte.GetInstance().Width; i++)
                 {
                     for (int j = 0; j < Carte.GetInstance().Height; j++)
@@ -1095,56 +983,36 @@ namespace JustInTimberland
                         {
                             if (cellule != null && !cellule.Bloque && cellule is Arbre && !((Arbre)cellule).SeFaitDecouper)
                             {
-                                int FacteurHache = 1;
-                                if (_bucheron.BonusHache > 0)
-                                {
-                                    FacteurHache = 2;
-                                }
-                                int poids = ((Arbre)cellule).Risque +
-                                    (Math.Abs(_bucheron._X - i) + Math.Abs(_bucheron._Y - j) / 2) + //Nb de Tours du bucheron a l'arbre
-                                    (
-                                        (int)Math.Ceiling((double)((Arbre)Carte.GetInstance().tableau[i, j]).Energie / FacteurHache) // Temps que je mets à le couper 
-                                    ) +
-                                    (Math.Abs(0 - i) + Math.Abs(7 - j) / 2); // Nb de Tours de l'arbre au camion
-                                ListeDesPositions.Add(new Tuple<Cellule, int>(cellule, poids));
-                                Console.Error.WriteLine(_bucheron.nom + ": " + cellule.X + "," + cellule.Y + " -> " + poids);
+                                ListeDesPositions.Add(new int[] { i, j, (Math.Abs(_bucheron._X - i) + Math.Abs(_bucheron._Y - j) / 2)
+                            + ((Arbre)Carte.GetInstance().tableau[i, j]).Energie +
+                            (Math.Abs(0 - i) + Math.Abs(7 - j) / 2)});
                             }
                         }
                         else
                         {
                             if (cellule != null && !cellule.Bloque && cellule is Arbre && !((Arbre)cellule).SeFaitDecouper && !((Arbre)cellule).Tag)
                             {
-                                int FacteurHache = 1;
-                                if (_bucheron.BonusHache > 0)
-                                {
-                                    FacteurHache = 2;
-                                }
-                                int poids = ((Arbre)cellule).Risque +
-                                    (Math.Abs(_bucheron._X - i) + Math.Abs(_bucheron._Y - j) / 2) + //Nb de Tours du bucheron a l'arbre
-                                    (
-                                        (int)Math.Ceiling((double)((Arbre)Carte.GetInstance().tableau[i, j]).Energie / FacteurHache) // Temps que je mets à le couper 
-                                    ) +
-                                    (Math.Abs(0 - i) + Math.Abs(7 - j) / 2); // Nb de Tours de l'arbre au camion
-                                ListeDesPositions.Add(new Tuple<Cellule, int>(cellule, poids));
-                                Console.Error.WriteLine(_bucheron.nom + ": " + cellule.X + "," + cellule.Y + " -> " + poids);
+                                ListeDesPositions.Add(new int[] { i, j, (Math.Abs(_bucheron._X - i) + Math.Abs(_bucheron._Y - j) / 2)
+                            + ((Arbre)Carte.GetInstance().tableau[i, j]).Energie +
+                            (Math.Abs(0 - i) + Math.Abs(7 - j) / 2)});
                             }
                         }
                     }
                 }
-                Tuple<Cellule, int> arbre = null;
+                int[] arbre = null;
                 if (ListeDesPositions.Count > 0)
                 {
-                    int NbToursMin = ListeDesPositions.Select(p => p.Item2).Min();
-                    List<Tuple<Cellule, int>> ListeDesMeilleurs = ListeDesPositions.Where(p => p.Item2 == NbToursMin).ToList();
-                    foreach(Tuple<Cellule, int> position in ListeDesMeilleurs)
+                    int NbToursMin = ListeDesPositions.Select(p => p[2]).Min();
+                    List<int[]> ListeDesMeilleurs = ListeDesPositions.Where(p => p[2] == NbToursMin).ToList();
+                    foreach(int[] position in ListeDesMeilleurs)
                     {
-                        if (_bucheron.cible != null && _bucheron.cible.X == position.Item1.X && _bucheron.cible.Y == position.Item1.Y)
+                        if (_bucheron.cible != null && _bucheron.cible.X == position[0] && _bucheron.cible.Y == position[1])
                         {
-                            _bucheron.cible = Carte.GetInstance().tableau[position.Item1.X, position.Item1.Y];
+                            _bucheron.cible = Carte.GetInstance().tableau[position[0], position[1]];
                             return;
                         }
                     }
-                    arbre = ListeDesPositions.Where(p => p.Item2 == NbToursMin).FirstOrDefault();
+                    arbre = ListeDesPositions.Where(p => p[2] == NbToursMin).FirstOrDefault();
                 }
 
 
@@ -1155,7 +1023,7 @@ namespace JustInTimberland
                 }
                 else
                 {
-                    _bucheron.cible = Carte.GetInstance().tableau[arbre.Item1.X, arbre.Item1.Y];
+                    _bucheron.cible = Carte.GetInstance().tableau[arbre[0], arbre[1]];
                 }
             }
             else if (Type.Equals(type, typeof(BonusEnergie)))
@@ -1216,7 +1084,7 @@ namespace JustInTimberland
         {
             int Distance = Math.Abs(_bucheron._X - cellule.X) + Math.Abs(_bucheron._Y - cellule.Y);
             int NbTours = (int)Math.Floor((float)Distance / 2) + 1;
-            return ((float)cellule.Energie / (float)NbTours);
+            return ((float)cellule.Energie / (float)Math.Pow((double)NbTours,(double)2));
         }
 
         public bool IlExistePasLoin(Type type)
@@ -1260,10 +1128,6 @@ namespace JustInTimberland
                                 {
                                     listeObjets.Add(new Tuple<Cellule, float>(cellule, CalculPoidsEnergie((BonusEnergie)cellule)));
                                 }
-                                else if (Type.Equals(type, typeof(BonusCoupe)))
-                                {
-                                    listeObjets.Add(new Tuple<Cellule, float>(cellule, ((BonusCoupe)cellule).AxeBonus));
-                                }
                                 else
                                 {
                                     throw new Exception("Type non gere : " + type);
@@ -1299,10 +1163,9 @@ namespace JustInTimberland
         }
         public override string DefinirAction()
         {
-            int Epsilon1 = 15;
-            int Epsilon2 = 30;
+            int Epsilon = 15;
             String action = String.Empty;
-            if (!_bucheron.JeCoupe && !_bucheron.JeVole && _bucheron.Energy > 0 && _bucheron.Energy <= Epsilon1 && IlExistePasLoin(typeof(BonusEnergie)))//si je ne porte rien et je ne coupe pas, ne vole pas, que j'ai moins de Epsilon energie et que j'ai un Bonus Energie à moins de 5 cases
+            if (!_bucheron.JeCoupe && !_bucheron.JeVole && _bucheron.Energy > 0 && _bucheron.Energy <= Epsilon && IlExistePasLoin(typeof(BonusEnergie)))//si je ne porte rien et je ne coupe pas, ne vole pas, que j'ai moins de Epsilon energie et que j'ai un Bonus Energie à moins de 5 cases
             {
                 TrouverEnVisu(typeof(BonusEnergie));
                 if (_bucheron.cible == null)
@@ -1311,7 +1174,7 @@ namespace JustInTimberland
                 }
                 action = PathFinding_Cible();
             }
-            if (_bucheron.Energy <= 50 && !_bucheron.JeVole && ! _bucheron.JeCoupe && Carte.GetInstance().NbTourMax - Carte.GetInstance().NbTour >= Epsilon2)
+            if (_bucheron.Energy == 0 && !_bucheron.JeVole && ! _bucheron.JeCoupe)
             {
                 JeTrouveLePlusRentable(typeof(BonusEnergie));
                 if (_bucheron.cible == null)
@@ -1504,7 +1367,7 @@ namespace JustInTimberland
 
             if (Carte.GetInstance().TagLeft > 0)
             {
-                JeTrouveArbreLePlusRentablePourTag();
+                JeTrouveArbreLePlusRentable();
                 if (_bucheron.cible != null)
                 {
                     if (Carte.GetInstance().EstACote(_bucheron._X,_bucheron._Y,_bucheron.cible.X,_bucheron.cible.Y))
@@ -1521,14 +1384,24 @@ namespace JustInTimberland
             return action;
         }
 
-        private void JeTrouveArbreLePlusRentablePourTag()
+        private void JeTrouveArbreLePlusRentable()
         {
             List<Tuple<Cellule, float>> ListeTuple = new List<Tuple<Cellule, float>>();
             foreach(Cellule cellule in Carte.GetInstance().tableau)
             {
-                if (cellule != null && cellule is Arbre && !cellule.Bloque && !((Arbre)cellule).Tag && !((Arbre)cellule).Entamme)
+                if (Carte.GetInstance().UtiliserArbreTag)
                 {
-                    ListeTuple.Add(new Tuple<Cellule, float>(cellule, CalculPerturbationArbre((Arbre)cellule)));
+                    if (cellule != null && cellule is Arbre && !cellule.Bloque && !((Arbre)cellule).Entamme)
+                    {
+                        ListeTuple.Add(new Tuple<Cellule, float>(cellule, CalculPerturbationArbre((Arbre)cellule)));
+                    }
+                }
+                else
+                {
+                    if (cellule != null && cellule is Arbre && !cellule.Bloque && !((Arbre)cellule).Tag && !((Arbre)cellule).Entamme)
+                    {
+                        ListeTuple.Add(new Tuple<Cellule, float>(cellule, CalculPerturbationArbre((Arbre)cellule)));
+                    }
                 }
             }
             if (ListeTuple.Count > 0)
@@ -1546,7 +1419,7 @@ namespace JustInTimberland
         {
             float poids = 0;
 
-            poids = cellule.Risque + Convert.ToSingle(2 * (Math.Floor((double)(Math.Abs(cellule.X - 0) + Math.Abs(cellule.Y - 7))/(double)4)) + cellule.Energie);
+            poids = Convert.ToSingle(2 * (Math.Floor((double)(Math.Abs(cellule.X - 0) + Math.Abs(cellule.Y - 7))/(double)4)) + cellule.Energie);
 
             return poids;
         }
@@ -1561,17 +1434,6 @@ namespace JustInTimberland
         public override string DefinirAction()
         {
             String action = String.Empty;
-
-            if (_bucheron.BonusHache <= 1 && !_bucheron.JeCoupe && ! _bucheron.JeVole && IlExistePasLoin(typeof(BonusCoupe)))
-            {
-                TrouverEnVisu(typeof(BonusCoupe));
-                if (_bucheron.cible == null)
-                {
-                    throw new Exception("je n'ai pas retouvé le BonusCoupe");
-                }
-                action = PathFinding_Cible();
-            }
-
             return action;
         }
     }
@@ -1607,7 +1469,7 @@ namespace JustInTimberland
                     }
                 }
             }
-            if (! _bucheron.JeCoupe && JePeuxVolerArbre())
+            if (JePeuxVolerArbre())
             {
                 if (Carte.GetInstance().EstACote(_bucheron._X,_bucheron._Y,_bucheron.cible.X,_bucheron.cible.Y))
                 {
@@ -1629,17 +1491,12 @@ namespace JustInTimberland
             bool jePeuxVoler = false;
             foreach (Cellule cellule in Carte.GetInstance().tableau)
             {
-                if (cellule != null && cellule is Arbre && !((Arbre)cellule).Bloque && ((Arbre)cellule).SeFaitDecouper && ! ((Arbre)cellule).Tag )
+                if (cellule != null && cellule is Arbre && !((Arbre)cellule).Bloque && ((Arbre)cellule).SeFaitDecouper && ! ((Arbre)cellule).Tag)
                 {
-                    //je regarde si j'aurai le temps d'y aller
-                    int distance = PathFinder.Solve(_bucheron._X, _bucheron._Y, cellule.X, cellule.Y, false).Count();
-                    if (Math.Floor((double)distance / (double)4) <= ((Arbre)cellule).Energie && _bucheron.Energy >= 2 * (int)distance / 4 + Math.Max(distance % 4 - 2, 0))
+                    _bucheron.cible = cellule;
+                    if (IlYAUnEnnemiACoteDeMaCible())
                     {
-                        _bucheron.cible = cellule;
-                        if (IlYAUnEnnemiACoteDeMaCible())
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -1842,19 +1699,11 @@ namespace JustInTimberland
                     int y = int.Parse(inputs[3]);
                     int amount = int.Parse(inputs[4]); // depends of type (see rules)
                     carte.MettreAJourTableau(entityType, x, y, amount);
-                    if (carte.Ennemi1.PasBouge)
-                    {
-                        carte.GererRisque(carte.Ennemi1);
-                    }
-                    if (carte.Ennemi2.PasBouge)
-                    {
-                        carte.GererRisque(carte.Ennemi2);
-                    }
                 }
                 carte.Curiosity.VerifierBonus();
                 carte._Opportunity.VerifierBonus();
-                String OpportunityAction =carte._Opportunity.DefinirAction();
                 String CuriosityAction = carte.Curiosity.DefinirAction();
+                String OpportunityAction =carte._Opportunity.DefinirAction();
 
                 if (((PlayableBucheron) carte.Curiosity).BesoinRenforts || ((PlayableBucheron)carte._Opportunity).BesoinRenforts)
                 {

@@ -438,13 +438,35 @@ namespace JustInTimberland
             {
                 if (bucheron == Ennemi1 || bucheron == Ennemi2)  //tester s'ils ont bougé depuis le dernier tour
                 {
-                    bucheron.PasBouge = false;
-                    if (bucheron.PrecedentePosition != null && bucheron._X == bucheron.PrecedentePosition.X && bucheron._Y == bucheron.PrecedentePosition.Y && !( bucheron._X == 29 && bucheron._Y == 7))
+                    if (bucheron.PrecedentePosition != null && bucheron._X == bucheron.PrecedentePosition.X && bucheron._Y == bucheron.PrecedentePosition.Y && bucheron._X != 29 && bucheron._Y != 7)
                     {
-                        bucheron.PasBouge = true;
-                        Console.Error.WriteLine("PAS BOUGE : " + bucheron._X + "," + bucheron._Y);
+                        
+                        if (bucheron._X - 1 >= 0 &&
+                            ListePointsASurveiller.Where(c => c.X == (bucheron._X - 1) && c.Y == bucheron._Y).Count() == 0
+                            )
+                        {
+                            ListePointsASurveiller.Add(new CelluleInconnue(bucheron._X - 1, bucheron._Y));
+                        }
+                        if (bucheron._X + 1 < Carte.GetInstance().Width &&
+                            ListePointsASurveiller.Where(c => c.X == (bucheron._X + 1) && c.Y == bucheron._Y).Count() == 0
+                            )
+                        {
+                            ListePointsASurveiller.Add(new CelluleInconnue(bucheron._X + 1, bucheron._Y));
+                        }
+                        if (bucheron._Y - 1 >= 0 &&
+                            ListePointsASurveiller.Where(c => c.X == (bucheron._X) && c.Y == (bucheron._Y - 1)).Count() == 0
+                            )
+                        {
+                            ListePointsASurveiller.Add(new CelluleInconnue(bucheron._X, bucheron._Y - 1));
+                        }
+                        if (bucheron._Y + 1 < Carte.GetInstance().Height &&
+                            ListePointsASurveiller.Where(c => c.X == (bucheron._X) && c.Y == (bucheron._Y + 1)).Count() == 0
+                            )
+                        {
+                            ListePointsASurveiller.Add(new CelluleInconnue(bucheron._X, bucheron._Y + 1));
+                        }
                     }
-                    bucheron.PrecedentePosition = new CelluleInconnue(x,y);
+                    bucheron.PrecedentePosition = new CelluleInconnue(bucheron._X, bucheron._Y);
                 }
 
                 bucheron._X = x;
@@ -582,9 +604,8 @@ namespace JustInTimberland
         internal void GererSecuriteTags()
         {
             int Epsilon1 = 100;
-            int Epsilon2 = 50;
+            int Epsilon2 = 30;
             bool TagExiste = false;
-            bool QueDuRisque = true;
             foreach (Cellule cellule in tableau)
             {
                 if (cellule != null && cellule is Arbre)
@@ -593,22 +614,8 @@ namespace JustInTimberland
                     {
                         TagExiste = true;
                     }
-                    if (((Arbre)cellule).Risque == 0 && !((Arbre)cellule).Tag)
-                    {
-                        QueDuRisque = false;
-                    }
                 }
             }
-            
-            if (QueDuRisque)
-            {
-                UtiliserArbreTag = true;
-            }
-            else
-            {
-                UtiliserArbreTag = false;
-            }
-
             if (!TagExiste && NbTour > Epsilon1)
             {
                 UtiliserArbreTag = true;
@@ -624,47 +631,6 @@ namespace JustInTimberland
                 UtiliserArbreTag = true;
             }
         }
-
-        internal void GererRisque(AbstractBucheron bucheron)
-        {
-            List<Cellule> listeVoisins = new List<Cellule>();
-            if (bucheron.PrecedentePosition.X - 1 >= 0)
-            {
-                Cellule voisinGauche = new CelluleInconnue(bucheron.PrecedentePosition.X - 1, bucheron.PrecedentePosition.Y);
-                listeVoisins.Add(voisinGauche);
-            }
-            if (bucheron.PrecedentePosition.X + 1 < Width)
-            {
-                Cellule voisinDroit = new CelluleInconnue(bucheron.PrecedentePosition.X + 1, bucheron.PrecedentePosition.Y);
-                listeVoisins.Add(voisinDroit);
-            }
-            if (bucheron.PrecedentePosition.Y - 1 >= 0)
-            {
-                Cellule voisinHaut = new CelluleInconnue(bucheron.PrecedentePosition.X, bucheron.PrecedentePosition.Y - 1);
-                listeVoisins.Add(voisinHaut);
-            }
-            if (bucheron.PrecedentePosition.Y + 1 < Height)
-            {
-                Cellule voisinBas = new CelluleInconnue(bucheron.PrecedentePosition.X, bucheron.PrecedentePosition.Y + 1);
-                listeVoisins.Add(voisinBas);
-            }
-
-            foreach(Cellule voisin in listeVoisins)
-            {
-                Cellule celluleTestee = tableau[voisin.X, voisin.Y];
-                if (celluleTestee != null && celluleTestee is Arbre)
-                {
-                    if (!((Arbre)celluleTestee).Entamme)
-                    {
-                        ((Arbre)celluleTestee).Risque = 1000;
-                    }
-                }
-                if (celluleTestee == null && ListePointsASurveiller.Where(v => v.X == voisin.X && v.Y == voisin.Y).Count() == 0)
-                {
-                    ListePointsASurveiller.Add(voisin);
-                }
-            }
-        }
     }
 
     public abstract class AbstractBucheron
@@ -678,7 +644,6 @@ namespace JustInTimberland
         public int Immobile { get; internal set; }
         public Cellule CelluleOrigine { get; internal set; }
         public CelluleInconnue PrecedentePosition { get; internal set; }
-        public bool PasBouge { get; internal set; }
 
         /*private int NombreDeToursPourRetournerAuCamionDepuis(int X, int Y)
         {
@@ -909,18 +874,12 @@ namespace JustInTimberland
             foreach(Cellule cellule in ListeSansRisque)
             {
                 Carte.GetInstance().ListePointsASurveiller.Remove(cellule);
-                Console.Error.WriteLine(nom + ": RETIRE " + cellule.X + "," + cellule.Y);
-            }
-            Console.Error.WriteLine("Points a surveiller : ");
-            foreach (Cellule cellule in Carte.GetInstance().ListePointsASurveiller)
-            {
-                Console.Error.WriteLine(" ==> " + cellule.X + "," + cellule.Y);
             }
 
-            foreach (GestionAction gestion in ListeDesActions)
+            foreach(GestionAction gestion in ListeDesActions)
             {
                 String Denomination = gestion.Denomination;
-                //Console.Error.WriteLine(nom + ": " + Denomination);
+                Console.Error.WriteLine(nom + ": " + Denomination);
                 String action = gestion.DefinirAction();
                 if (action != String.Empty)
                 {
@@ -1311,7 +1270,7 @@ namespace JustInTimberland
                 }
                 action = PathFinding_Cible();
             }
-            if (_bucheron.Energy <= 50 && !_bucheron.JeVole && ! _bucheron.JeCoupe && Carte.GetInstance().NbTourMax - Carte.GetInstance().NbTour >= Epsilon2)
+            if (_bucheron.Energy == 0 && !_bucheron.JeVole && ! _bucheron.JeCoupe && Carte.GetInstance().NbTourMax - Carte.GetInstance().NbTour >= Epsilon2)
             {
                 JeTrouveLePlusRentable(typeof(BonusEnergie));
                 if (_bucheron.cible == null)
@@ -1607,7 +1566,7 @@ namespace JustInTimberland
                     }
                 }
             }
-            if (! _bucheron.JeCoupe && JePeuxVolerArbre())
+            if (JePeuxVolerArbre())
             {
                 if (Carte.GetInstance().EstACote(_bucheron._X,_bucheron._Y,_bucheron.cible.X,_bucheron.cible.Y))
                 {
@@ -1629,17 +1588,12 @@ namespace JustInTimberland
             bool jePeuxVoler = false;
             foreach (Cellule cellule in Carte.GetInstance().tableau)
             {
-                if (cellule != null && cellule is Arbre && !((Arbre)cellule).Bloque && ((Arbre)cellule).SeFaitDecouper && ! ((Arbre)cellule).Tag )
+                if (cellule != null && cellule is Arbre && !((Arbre)cellule).Bloque && ((Arbre)cellule).SeFaitDecouper && ! ((Arbre)cellule).Tag)
                 {
-                    //je regarde si j'aurai le temps d'y aller
-                    int distance = PathFinder.Solve(_bucheron._X, _bucheron._Y, cellule.X, cellule.Y, false).Count();
-                    if (Math.Floor((double)distance / (double)4) <= ((Arbre)cellule).Energie && _bucheron.Energy >= 2 * (int)distance / 4 + Math.Max(distance % 4 - 2, 0))
+                    _bucheron.cible = cellule;
+                    if (IlYAUnEnnemiACoteDeMaCible())
                     {
-                        _bucheron.cible = cellule;
-                        if (IlYAUnEnnemiACoteDeMaCible())
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -1842,14 +1796,6 @@ namespace JustInTimberland
                     int y = int.Parse(inputs[3]);
                     int amount = int.Parse(inputs[4]); // depends of type (see rules)
                     carte.MettreAJourTableau(entityType, x, y, amount);
-                    if (carte.Ennemi1.PasBouge)
-                    {
-                        carte.GererRisque(carte.Ennemi1);
-                    }
-                    if (carte.Ennemi2.PasBouge)
-                    {
-                        carte.GererRisque(carte.Ennemi2);
-                    }
                 }
                 carte.Curiosity.VerifierBonus();
                 carte._Opportunity.VerifierBonus();
