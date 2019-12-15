@@ -29,28 +29,7 @@ namespace JustInTimberland
     {
         public static List<Noeud> Solve(int XOrigine, int YOrigine, int XDestination, int YDestination, bool Franchissable)
         {
-            ////Console.Error.WriteLine("PathFinding de " + XOrigine + "," + YOrigine + " vers " + XDestination + "," + YDestination);
-            
-            /*List<Noeud> chemin = new List<Noeud>();
-            List<Tuple<List<Noeud>, Cellule, Cellule>> liste = Carte.GetInstance().ListeDesCheminCalcules.Where(t => t.Item2.X == XOrigine && t.Item2.Y == YOrigine && t.Item3.X == XDestination && t.Item3.Y == YDestination).ToList();
-            if (liste.Count() > 0)
-            {
-                //Console.Error.WriteLine("Recupere");
-                return liste.First().Item1; 
-            }
-            liste = Carte.GetInstance().ListeDesCheminCalcules.Where(t => t.Item3.X == XOrigine && t.Item3.Y == YOrigine && t.Item2.X == XDestination && t.Item2.Y == YDestination).ToList();
-            if (liste.Count() > 0)
-            {
-                //Console.Error.WriteLine("Recupere V2");
-                chemin = liste.First().Item1;
-                chemin.Reverse();
-                return chemin;
-            }*/
-            return CalculerChemin(XOrigine, YOrigine, XDestination, YDestination, Franchissable);
-        }
-
-        private static List<Noeud> CalculerChemin(int XOrigine, int YOrigine, int XDestination, int YDestination, bool Franchissable)
-        {
+            //Console.Error.WriteLine("PathFinding de " + XOrigine + "," + YOrigine + " vers " + XDestination + "," + YDestination);
             bool found = false;
             List<Noeud> NoeudsParcourus = new List<Noeud>();
             List<Noeud> chemin = new List<Noeud>();
@@ -76,12 +55,12 @@ namespace JustInTimberland
                 AExplorer.RemoveAt(0);
                 if (NoeudsParcourus.Where(n => n.x == _noeud.x && n.y == _noeud.y && n.cout <= _noeud.cout).Count() > 0)
                 {
-                    ////Console.Error.WriteLine("ne rien faire");
+                    //Console.Error.WriteLine("ne rien faire");
                 }
                 else
                 {
                     NoeudsParcourus.Add(_noeud);
-                    if ((_noeud.x == XDestination && _noeud.y == YDestination) && Franchissable)
+                    if ((_noeud.x == XDestination && _noeud.y == YDestination) &&Franchissable)
                     {
                         destination = _noeud;
                         found = true;
@@ -92,7 +71,7 @@ namespace JustInTimberland
                         found = true;
                     }
                     else
-                    {
+                    { 
                         foreach (Noeud voisin in (ObtenirVoisins(_noeud)))
                         {
                             voisin.cout = _noeud.cout + 1;
@@ -106,7 +85,7 @@ namespace JustInTimberland
 
 
             Noeud noeud = destination;
-            while (noeud != null)
+            while(noeud != null)
             {
                 chemin.Insert(0, noeud);
                 noeud = noeud.parent;
@@ -115,11 +94,6 @@ namespace JustInTimberland
             {
                 chemin.RemoveAt(0);
             }
-            if (Carte.GetInstance().ListeDesCheminCalcules.Where(T => T.Item2.X == XOrigine && T.Item2.Y == YOrigine && T.Item3.X == XDestination && T.Item3.Y == YDestination).Count() == 0)
-            {
-                Carte.GetInstance().ListeDesCheminCalcules.Add(new Tuple<List<Noeud>, Cellule, Cellule>(chemin, new CelluleInconnue(XOrigine, YOrigine), new CelluleInconnue(XDestination, YDestination)));
-            }
-            //Console.Error.WriteLine("chemins calcules : " + Carte.GetInstance().ListeDesCheminCalcules.Count());
             return chemin;
         }
 
@@ -189,19 +163,6 @@ namespace JustInTimberland
         MODE_DECOUPE, //on coupe l'arbre et si l'autre bucheron n'est pas loin on l'appelle pour sécuriser 
         MODE_COOPERATIF, //quand il n'y a plus d'arbres de niveau 1, on cherche les arbres de niveau supérieur en cherchant la rentabilité : A FAIRE
         MODE_CAISSE_CHAMPIGNON
-    }
-
-    public class ZoneDeRecherche
-    {
-        public int XDebut, YDebut, XFin, YFin;
-
-        public ZoneDeRecherche(int xDebut, int yDebut, int xFin, int yFin)
-        {
-            XDebut = xDebut;
-            YDebut = yDebut;
-            XFin = xFin;
-            YFin = yFin;
-        }
     }
 
     public abstract class Cellule
@@ -335,7 +296,7 @@ namespace JustInTimberland
         }
     }
 
-    public class Camion : CellulleFranchissable
+    public class Camion : CellulleBloquante
     { 
         public Camion(int x, int y) : base(x, y)
         {
@@ -346,6 +307,7 @@ namespace JustInTimberland
     {
         public Obstacle(int x, int y) : base(x, y)
         {
+
         }
     }
     public class Carte
@@ -368,8 +330,6 @@ namespace JustInTimberland
         public AbstractBucheron Ennemi1 = null;
         public AbstractBucheron Ennemi2 = null;
         private static Carte INSTANCE = null;
-
-        public List<Tuple<List<Noeud>, Cellule, Cellule>> ListeDesCheminCalcules = new List<Tuple<List<Noeud>, Cellule, Cellule>>();
 
         public bool MiseAJourCeTour;
 
@@ -402,6 +362,8 @@ namespace JustInTimberland
             {
                 ACote = true;
             }
+
+
             return ACote;
         }
 
@@ -419,7 +381,7 @@ namespace JustInTimberland
                     Curiosity.Id = id;
                     Curiosity.nom = id.ToString();
 
-                    //Console.Error.WriteLine("Hello Curiosity : " + id);
+                    Console.Error.WriteLine("Hello Curiosity : " + id);
                 }
                 else if (_Opportunity == null)
                 {
@@ -427,7 +389,7 @@ namespace JustInTimberland
                     _Opportunity.Id = id;
                     _Opportunity.nom = id.ToString();
 
-                    //Console.Error.WriteLine("Hello Opportunity : " + id);
+                    Console.Error.WriteLine("Hello Opportunity : " + id);
                 }
 
                 if (Curiosity.Id == id)
@@ -514,13 +476,13 @@ namespace JustInTimberland
                 case 2: //arbre
                     if (cell == null)
                     {
-                        ////Console.Error.WriteLine("Arbre a  x:" + x + " y:" + y);
+                        //Console.Error.WriteLine("Arbre a  x:" + x + " y:" + y);
                         cell = new Arbre(x,y);
                         MiseAJourCeTour = true;
                     }
                     if (((Arbre)cell).Energie > amount)
                     {
-                        ////Console.Error.WriteLine("un arbre se fait couper en x:" + x + " y:" + y);
+                        //Console.Error.WriteLine("un arbre se fait couper en x:" + x + " y:" + y);
                         ((Arbre)cell).SeFaitCouperCeTour = true;
                     }
                     else
@@ -557,7 +519,7 @@ namespace JustInTimberland
                         ((BonusEnergie)cell).Energie = amount;
                     }
                     ((BonusEnergie)cell).Visible = true;
-                    ////Console.Error.WriteLine("Je mets à jour un Bonus d'energie " + x + "," + y);
+                    //Console.Error.WriteLine("Je mets à jour un Bonus d'energie " + x + "," + y);
                     break;
                 case 8: //Bonus Coupe
                     if (cell == null)
@@ -730,7 +692,7 @@ namespace JustInTimberland
     {
         public Bucheron()
         {
-            //Console.Error.WriteLine("Creation d'un Bucheron ennemi");
+            Console.Error.WriteLine("Creation d'un Bucheron ennemi");
         }
     }
 
@@ -755,13 +717,6 @@ namespace JustInTimberland
         public List<Noeud> chemin;
 
         public bool CibleChange = false;
-
-        public Queue<ZoneDeRecherche> QueueDesZones = new Queue<ZoneDeRecherche>();
-
-        public ZoneDeRecherche zoneActive = null;
-
-        internal bool JeExplore;
-        internal bool RetourCamion;
 
         public void AppelerRenforts()
         {
@@ -792,6 +747,7 @@ namespace JustInTimberland
         {
             if (Cible != null)
             {
+                //Console.Error.WriteLine(nom +  ": cible -> " + Cible.X + "," + Cible.Y);
                 MiseAJourCible(Carte.GetInstance().tableau[Cible.X, Cible.Y]);
                 if (Cible != null && Cible is Obstacle)
                 {
@@ -835,12 +791,18 @@ namespace JustInTimberland
             foreach(Cellule cellule in ListeSansRisque)
             {
                 Carte.GetInstance().ListePointsASurveiller.Remove(cellule);
+                //Console.Error.WriteLine(nom + ": RETIRE " + cellule.X + "," + cellule.Y);
             }
+            //Console.Error.WriteLine("Points a surveiller : ");
+            /*foreach (Cellule cellule in Carte.GetInstance().ListePointsASurveiller)
+            {
+                Console.Error.WriteLine("surveille : " + cellule.X + "," + cellule.Y);
+            }*/
 
             foreach (GestionAction gestion in ListeDesActions)
             {
                 String Denomination = gestion.Denomination;
-                ////Console.Error.WriteLine(nom + ": " + Denomination);
+                //Console.Error.WriteLine(nom + ": " + Denomination);
                 String action = gestion.DefinirAction();
                 if (action != String.Empty)
                 {
@@ -867,7 +829,7 @@ namespace JustInTimberland
                             }
                             else
                             {
-                                ////Console.Error.WriteLine(nom + " Destruction du Bonus : " + cellule.X + "," + cellule.Y);
+                                //Console.Error.WriteLine(nom + " Destruction du Bonus : " + cellule.X + "," + cellule.Y);
                                 Carte.GetInstance().tableau[i, j] = null;
                             }
                         }
@@ -886,7 +848,6 @@ namespace JustInTimberland
             nom = Id.ToString();
 
             //ajout des opérations dans le "cerveau"
-            ListeDesActions.Add(new GestionActionRisqueTag(this));
             ListeDesActions.Add(new GestionActionInventaire(this));
             ListeDesActions.Add(new GestionActionEnergie(this));
             ListeDesActions.Add(new GestionActionVol(this));
@@ -894,14 +855,6 @@ namespace JustInTimberland
             ListeDesActions.Add(new GestionActionBonusHache(this));
             ListeDesActions.Add(new GestionActionBucheron(this));
             ListeDesActions.Add(new GestionActionExploration(this));
-
-            //Ajout des zones de recherche
-            QueueDesZones.Enqueue(new ZoneDeRecherche(0, 0, 10, 10));
-            QueueDesZones.Enqueue(new ZoneDeRecherche(10, 0, 20, 10));
-            QueueDesZones.Enqueue(new ZoneDeRecherche(20, 0, 30, 10));
-            QueueDesZones.Enqueue(new ZoneDeRecherche(0, 0, 30, 15));
-
-            zoneActive = QueueDesZones.Dequeue();
         }
     }
 
@@ -920,14 +873,6 @@ namespace JustInTimberland
             ListeDesActions.Add(new GestionActionBonusHache(this));
             ListeDesActions.Add(new GestionActionBucheron(this));
             ListeDesActions.Add(new GestionActionExploration(this));
-
-            //Ajout des zones de recherche
-            QueueDesZones.Enqueue(new ZoneDeRecherche(0, 5, 10, 15));
-            QueueDesZones.Enqueue(new ZoneDeRecherche(10, 5, 20, 15));
-            QueueDesZones.Enqueue(new ZoneDeRecherche(20, 5, 30, 15));
-            QueueDesZones.Enqueue(new ZoneDeRecherche(0, 0, 30, 15));
-
-            zoneActive = QueueDesZones.Dequeue();
         }
     }
 
@@ -945,7 +890,6 @@ namespace JustInTimberland
 
         public String PathFinding_Cible()
         {
-            //Console.Error.WriteLine(_bucheron.nom + ": " + _bucheron.Cible.X + "," + _bucheron.Cible.Y);
             String action = PathFinding(_bucheron.Cible.X, _bucheron.Cible.Y);
             if (action.Equals(String.Empty))
             {
@@ -965,19 +909,10 @@ namespace JustInTimberland
         /// <returns></returns>
         protected String PathFinding(int x, int y)
         {
-            //Console.Error.WriteLine("MiseAJourCeTour : " + Carte.GetInstance().MiseAJourCeTour);
             if (Carte.GetInstance().MiseAJourCeTour || _bucheron.CibleChange)
             {
-                bool franchissable;
-                if (Carte.GetInstance().tableau[x, y] != null)
-                {
-                    franchissable = Carte.GetInstance().tableau[x, y].Franchissable;
-                }
-                else
-                {
-                    franchissable = true;
-                }
-                ////Console.Error.WriteLine(_bucheron.nom + ": calcul de pathfinding");
+                bool franchissable = Carte.GetInstance().tableau[x, y].Franchissable;
+                //Console.Error.WriteLine(_bucheron.nom + ": calcul de pathfinding");
                 _bucheron.chemin = PathFinder.Solve(_bucheron._X, _bucheron._Y, x, y, franchissable);
             }
             String action = TraiterChemin();
@@ -1003,6 +938,10 @@ namespace JustInTimberland
             {
                 pas = Math.Min(4, _bucheron.chemin.Count()) - 1;
             }
+            /*foreach (Noeud noeud in _bucheron.chemin.GetRange(0, Math.Min(10,_bucheron.chemin.Count())))
+            {
+                Console.Error.WriteLine(_bucheron.nom + ": Path -> " + noeud.x + "," + noeud.y + "  PAS : " + pas);
+            }*/
             _bucheron.chemin.RemoveRange(0, pas);
             String action = "MOVE " + _bucheron.chemin[0].x + " " + _bucheron.chemin[0].y;
             _bucheron.chemin.RemoveAt(0);
@@ -1011,7 +950,7 @@ namespace JustInTimberland
 
         /*public String PathFinding_Camion()
 {
-   //Console.Error.WriteLine("PathFinding Camion");
+   Console.Error.WriteLine("PathFinding Camion");
    return PathFinding(0, 7);
 }
 
@@ -1044,9 +983,9 @@ protected String PathFinding_CaisseChampignon()
             if (Type.Equals(type, typeof(Arbre)))
             {
                 List<Tuple<Arbre, int>> ListeDesArbresPeses = new List<Tuple<Arbre, int>>();
-                for (int i = _bucheron.zoneActive.XDebut; i < _bucheron.zoneActive.XFin; i++) //je liste tous les arbres de ma zone de recherche
+                for (int i = 0; i < Carte.GetInstance().Width; i++) //je liste tous les arbres 
                 {
-                    for (int j = _bucheron.zoneActive.YDebut; j < _bucheron.zoneActive.YFin; j++) 
+                    for (int j = 0; j < Carte.GetInstance().Height; j++) 
                     {
                         Cellule cellule = Carte.GetInstance().tableau[i, j];
                         if (Carte.GetInstance().UtiliserArbreTag)
@@ -1086,7 +1025,7 @@ protected String PathFinding_CaisseChampignon()
 
                 if (arbre == null)
                 {
-                    ////Console.Error.WriteLine(_bucheron.nom + ": je n'ai pas trouvé d'arbre");
+                    //Console.Error.WriteLine(_bucheron.nom + ": je n'ai pas trouvé d'arbre");
                     _bucheron.MiseAJourCible(null);
                 }
                 else
@@ -1117,7 +1056,7 @@ protected String PathFinding_CaisseChampignon()
 
                 /*foreach(Tuple<Cellule, float> position in ListeDesPositions)
                 {
-                    //Console.Error.WriteLine("-->" + position.Item1.X + "," + position.Item1.Y + " : " + position.Item2);
+                    Console.Error.WriteLine("-->" + position.Item1.X + "," + position.Item1.Y + " : " + position.Item2);
                 }*/
 
                 if (ListeDesPositions.Count > 0)
@@ -1162,17 +1101,7 @@ protected String PathFinding_CaisseChampignon()
             int TempsCoupe = (int)Math.Floor((double)cellule.Energie / (1 + (double)BonusHache));
             if (calculRapide)
             {
-                List<Noeud> CheminAller = null;
-                if (CheminAller == null)
-                {
-                    DistanceAller = 0;
-                }
-                else
-                {
-                    DistanceAller = CheminAller.Count(); 
-                    DistanceAller = Math.Abs(_bucheron._X - cellule.X) + (_bucheron._Y - cellule.Y);
-                }
-                //List<Noeud> CheminRetour =PathFinder.Solve(cellule.X, cellule.Y, 0, 7, false);
+                DistanceAller = Math.Abs(_bucheron._X - cellule.X) + (_bucheron._Y - cellule.Y);
                 DistanceRetour = Math.Abs(0 - cellule.X) + (7 - cellule.Y);
             }
             else
@@ -1201,11 +1130,11 @@ protected String PathFinding_CaisseChampignon()
         public bool IlExistePasLoin(Type type)
         {
             bool existe = false;
-            for (int i = _bucheron._X - 4; i <= _bucheron._X + 5; i++)
+            for (int i = _bucheron._X - 5; i <= _bucheron._X + 5; i++)
             {
-                for (int j = _bucheron._Y - 4; j <= _bucheron._Y + 5; j++)
+                for (int j = _bucheron._Y - 5; j <= _bucheron._Y + 5; j++)
                 {
-                    if (i >= 0 && i < Carte.GetInstance().Width && j >= 0 && j < Carte.GetInstance().Height && Math.Abs(i - _bucheron._X) + Math.Abs(j - _bucheron._Y) <= 4)
+                    if (i >= 0 && i < Carte.GetInstance().Width && j >= 0 && j < Carte.GetInstance().Height)
                     {
                         Cellule cellule = Carte.GetInstance().tableau[i, j];
                         if (cellule != null && ! cellule.Bloque)
@@ -1224,11 +1153,11 @@ protected String PathFinding_CaisseChampignon()
         public void TrouverEnVisu(Type type)
         {
             List<Tuple<Cellule,float>> listeObjets = new List<Tuple<Cellule, float>>();
-            for (int i = _bucheron._X -4; i <= _bucheron._X +4; i++)
+            for (int i = _bucheron._X -5; i <= _bucheron._X +5; i++)
             {
-                for (int j = _bucheron._Y - 4; j <= _bucheron._Y + 4; j++)
+                for (int j = _bucheron._Y - 5; j <= _bucheron._Y + 5; j++)
                 {
-                    if (i >= 0 && i < Carte.GetInstance().Width && j >= 0 && j < Carte.GetInstance().Height && Math.Abs(i-_bucheron._X) + Math.Abs(j - _bucheron._Y) <= 4 )
+                    if (i >= 0 && i < Carte.GetInstance().Width && j >= 0 && j < Carte.GetInstance().Height)
                     {
                         Cellule cellule = Carte.GetInstance().tableau[i, j];
                         if (cellule != null && ! cellule.Bloque)
@@ -1307,44 +1236,6 @@ protected String PathFinding_CaisseChampignon()
         }
     }
 
-    public class GestionActionRisqueTag : GestionAction
-    {
-        public GestionActionRisqueTag(PlayableBucheron bucheron) : base(bucheron)
-        {
-
-        }
-
-        public override string DefinirAction()
-        {
-            String action = String.Empty;
-            bool changer = true;
-            for (int i = _bucheron.zoneActive.XDebut; i < _bucheron.zoneActive.XFin; i++)
-            {
-                for (int j = _bucheron.zoneActive.YDebut; j < _bucheron.zoneActive.YFin; j++)
-                {
-                    Cellule cellule = Carte.GetInstance().tableau[i, j];
-                    if (cellule != null && cellule is Arbre && ((Arbre)cellule).Risque == 0)
-                    {
-                        changer = false;
-                    }
-                }
-            }
-
-            if (changer)
-            {
-                //Console.Error.WriteLine("Changement de Zone");
-                _bucheron.zoneActive = _bucheron.QueueDesZones.Dequeue();
-                _bucheron.Cible = new CelluleInconnue(_bucheron.zoneActive.XFin - 1, ((_bucheron.zoneActive.YFin - 1 + _bucheron.zoneActive.YDebut) / 2));
-                if (!_bucheron.JeCoupe && !_bucheron.JeVole && !_bucheron.JeExplore)
-                {
-                    action = PathFinding_Cible();
-                }
-                _bucheron.JeExplore = true;
-            }
-            return action;
-        }
-    }
-
     public class GestionActionInventaire : GestionAction
     {
         public GestionActionInventaire(PlayableBucheron bucheron) : base(bucheron)
@@ -1359,13 +1250,8 @@ protected String PathFinding_CaisseChampignon()
             {
                 _bucheron.JeCoupe = false;
                 _bucheron.JeVole = false;
-                _bucheron.JeExplore = false;
                 _bucheron.CibleChange = true;
                 action = PathFinding_Camion();
-            }
-            else
-            {
-                _bucheron.RetourCamion = false;
             }
 
             return action;
@@ -1373,37 +1259,17 @@ protected String PathFinding_CaisseChampignon()
 
         private string PathFinding_Camion()
         {
-            if (!_bucheron.RetourCamion)
+            _bucheron.Cible = Carte.GetInstance().tableau[0, 7];
+            List<Noeud> liste1 = PathFinder.Solve(_bucheron._X, _bucheron._Y, 0, 6, true);
+            List<Noeud> liste2 = PathFinder.Solve(_bucheron._X, _bucheron._Y, 0, 8, true);
+
+            if (liste1.Count() < liste2.Count())
             {
-                _bucheron.Cible = Carte.GetInstance().tableau[0, 7];
-                List<Noeud> liste1 = PathFinder.Solve(_bucheron._X, _bucheron._Y, 0, 6, true);
-                List<Noeud> liste2 = PathFinder.Solve(_bucheron._X, _bucheron._Y, 0, 8, true);
-                List<Noeud> liste3 = PathFinder.Solve(_bucheron._X, _bucheron._Y, 0, 7, true);
-
-                int min = Math.Min(liste1.Count(), Math.Min(liste2.Count(), liste3.Count()));
-                if (liste1.Count() == min)
-                {
-                    _bucheron.chemin = liste1;
-                }
-                else if (liste2.Count() == min)
-                {
-                    _bucheron.chemin = liste2;
-                }
-                else
-                {
-                    _bucheron.chemin = liste3;
-                }
-
-                foreach (Noeud noeud in _bucheron.chemin)
-                {
-                    Console.Error.WriteLine(_bucheron.nom + ": " + noeud.x + "," + noeud.y);
-                }
-                _bucheron.RetourCamion = true;
+                _bucheron.chemin = liste1;
             }
-
-            foreach (Noeud noeud in _bucheron.chemin)
+            else
             {
-                Console.Error.WriteLine(_bucheron.nom + ": " + noeud.x + "," + noeud.y);
+                _bucheron.chemin = liste2;
             }
 
             String action = TraiterChemin();
@@ -1432,8 +1298,6 @@ protected String PathFinding_CaisseChampignon()
                 else
                 {
                     _bucheron.JeCoupe = true;
-                    _bucheron.JeExplore = false;
-                    _bucheron.JeVole = false;
                     action = "CUT " + _bucheron.Cible.X + " " + _bucheron.Cible.Y;
                     ((Arbre)_bucheron.Cible).SeFaitCouperCeTour = true;
                     return action;
@@ -1462,8 +1326,6 @@ protected String PathFinding_CaisseChampignon()
                 if (Carte.GetInstance().EstACote(_bucheron._X, _bucheron._Y, _bucheron.Cible.X, _bucheron.Cible.Y))
                 {
                     _bucheron.JeCoupe = true;
-                    _bucheron.JeExplore = false;
-                    _bucheron.JeVole = false;
                     action = "CUT " + _bucheron.Cible.X + " " + _bucheron.Cible.Y;
                     ((Arbre)_bucheron.Cible).SeFaitCouperCeTour = true;
                 }
@@ -1504,7 +1366,7 @@ protected String PathFinding_CaisseChampignon()
             AbstractBucheron Ennemi2 = Carte.GetInstance().Ennemi2;
             if (Ennemi1._X == _bucheron.AnciennePosition.X && Ennemi1._Y == _bucheron.AnciennePosition.Y)
             {
-                ////Console.Error.WriteLine(_bucheron.nom + ": on marche sur mes pas");
+                //Console.Error.WriteLine(_bucheron.nom + ": on marche sur mes pas");
                 Tuple<AbstractBucheron, int> tuple;
                 int compteur = 0;
                 if (_bucheron.Followers.Where(f => f.Item1 == Ennemi1).Count() > 0)
@@ -1531,7 +1393,7 @@ protected String PathFinding_CaisseChampignon()
             if (Ennemi2._X == _bucheron.AnciennePosition.X && Ennemi2._Y == _bucheron.AnciennePosition.Y)
             {
 
-                ////Console.Error.WriteLine(_bucheron.nom + ": on marche sur mes pas");
+                //Console.Error.WriteLine(_bucheron.nom + ": on marche sur mes pas");
                 Tuple<AbstractBucheron, int> tuple;
                 int compteur = 0;
                 if (_bucheron.Followers.Where(f => f.Item1 == Ennemi2).Count() > 0)
@@ -1554,7 +1416,7 @@ protected String PathFinding_CaisseChampignon()
 
             if (_bucheron.Followers.Where(f => f.Item2 >= Epsilon).Count() > 0)
             {
-                ////Console.Error.WriteLine(_bucheron.nom + ": je suis suivi");
+                //Console.Error.WriteLine(_bucheron.nom + ": je suis suivi");
                 suivi = true;
             }
 
@@ -1666,7 +1528,7 @@ protected String PathFinding_CaisseChampignon()
                 {
                     if (!(_bucheron.Cible is Arbre ) || !((Arbre)_bucheron.Cible).SeFaitCouperCeTour)
                     {
-                        ////Console.Error.WriteLine("ce FDP m'a grille");
+                        //Console.Error.WriteLine("ce FDP m'a grille");
                         _bucheron.JeVole = false;
                         _bucheron.MiseAJourCible(null);
                     }
@@ -1684,7 +1546,6 @@ protected String PathFinding_CaisseChampignon()
                     action = "WAIT";
                     _bucheron.JeVole = true;
                     _bucheron.JeCoupe = false;
-                    _bucheron.JeExplore = false;
                 }
                 else
                 {
@@ -1704,7 +1565,7 @@ protected String PathFinding_CaisseChampignon()
                 {
                     //je regarde si j'aurai le temps d'y aller
                     int distance = PathFinder.Solve(_bucheron._X, _bucheron._Y, cellule.X, cellule.Y, false).Count();
-                    if (Math.Floor((double)distance / (double)4) < ((Arbre)cellule).Energie && _bucheron.Energy >= 2 * (int)distance / 4 + Math.Max(distance % 4 - 2, 0))
+                    if (Math.Floor((double)distance / (double)4) <= ((Arbre)cellule).Energie && _bucheron.Energy >= 2 * (int)distance / 4 + Math.Max(distance % 4 - 2, 0))
                     {
                         _bucheron.MiseAJourCible(cellule);
                         if (IlYAUnEnnemiACoteDeMaCible())
@@ -1771,23 +1632,7 @@ protected String PathFinding_CaisseChampignon()
         public override string DefinirAction()
         {
             String action = String.Empty;
-            if (_bucheron.JeExplore)
-            {
-                if (_bucheron.chemin == null || (_bucheron.chemin != null && _bucheron.chemin.Count() == 0))
-                {
-                    //Console.Error.WriteLine("Changement de Zone");
-                    _bucheron.zoneActive = _bucheron.QueueDesZones.Dequeue();
-                }
-            }
-            else
-            {
-                //Console.Error.WriteLine("Changement de Zone");
-                _bucheron.zoneActive = _bucheron.QueueDesZones.Dequeue();
-                _bucheron.JeExplore = true;
-            }
-            _bucheron.Cible = new CelluleInconnue(_bucheron.zoneActive.XFin - 1, ((_bucheron.zoneActive.YFin - 1 + _bucheron.zoneActive.YDebut) / 2));
-            action = PathFinding_Cible();
-
+            action = "MOVE 29 7";
             return action;
         }
     }
@@ -1814,7 +1659,7 @@ protected String PathFinding_CaisseChampignon()
             {
                 ligne = Console.ReadLine();
             }
-            ////Console.Error.WriteLine(ligne);
+            //Console.Error.WriteLine(ligne);
             inputs = ligne.Split(' ');
             int width = int.Parse(inputs[0]);
             int height = int.Parse(inputs[1]);
@@ -1829,7 +1674,7 @@ protected String PathFinding_CaisseChampignon()
                 ligne = Console.ReadLine();
             }
             int N = int.Parse(ligne);
-            ////Console.Error.WriteLine("N:" + N);
+            //Console.Error.WriteLine("N:" + N);
             for (int i = 0; i < N; i++)
             {
                 if (debug)
@@ -1841,7 +1686,7 @@ protected String PathFinding_CaisseChampignon()
                 {
                     ligne = Console.ReadLine();
                 }
-                ////Console.Error.WriteLine(ligne);
+                //Console.Error.WriteLine(ligne);
 
                 inputs = ligne.Split(' ');
                 int cellType = int.Parse(inputs[0]); // 0 for truck, 1 for energy cells
@@ -1852,7 +1697,6 @@ protected String PathFinding_CaisseChampignon()
             //
             Carte carte = Carte.GetInstance();
             carte.InitialiserTableau(width, height);
-            Carte.GetInstance().MiseAJourCeTour = true;
             //carte.NbTags = N;
 
             // game loop
@@ -1862,6 +1706,7 @@ protected String PathFinding_CaisseChampignon()
                 Carte.GetInstance().NbTour++;
                 Carte.GetInstance().GererSecuriteTags();
                 Carte.GetInstance().MettreVisibiliteBonusFalse();
+                Carte.GetInstance().MiseAJourCeTour = false;
                 if (debug)
                 {
                     ligne = inputLines.ElementAt(0);
@@ -1871,7 +1716,7 @@ protected String PathFinding_CaisseChampignon()
                 {
                     ligne = Console.ReadLine();
                 }
-                ////Console.Error.WriteLine("score ==>" +ligne);
+                //Console.Error.WriteLine("score ==>" +ligne);
                 inputs = ligne.Split(' ');
                 int myScore = int.Parse(inputs[0]); // Amount of trees delivered
                 int opponentScore = int.Parse(inputs[1]);
@@ -1890,7 +1735,7 @@ protected String PathFinding_CaisseChampignon()
                     {
                         ligne = Console.ReadLine();
                     }
-                    ////Console.Error.WriteLine(ligne);
+                    //Console.Error.WriteLine(ligne);
                     inputs = ligne.Split(' ');
                     int id = int.Parse(inputs[0]); // unique id of the entity
                     int playerId = int.Parse(inputs[1]); // 0 for your lumberjack, 1 for other lumberjack
@@ -1910,7 +1755,7 @@ protected String PathFinding_CaisseChampignon()
                 {
                     ligne = Console.ReadLine();
                 }
-                ////Console.Error.WriteLine(ligne);
+                //Console.Error.WriteLine(ligne);
                 int entityCount = int.Parse(ligne); // number of entities visible to you
                 for (int i = 0; i < entityCount; i++)
                 {
@@ -1923,7 +1768,7 @@ protected String PathFinding_CaisseChampignon()
                     {
                         ligne = Console.ReadLine();
                     }
-                    ////Console.Error.WriteLine(ligne);
+                    //Console.Error.WriteLine(ligne);
                     inputs = ligne.Split(' ');
                     int id = int.Parse(inputs[0]);
                     int entityType = int.Parse(inputs[1]); // 2 for tree, 3 for stump, 4 for fence, 7 for energy bonus, 8 for axe bonus
@@ -1943,10 +1788,6 @@ protected String PathFinding_CaisseChampignon()
                 carte.Curiosity.VerifierBonus();
                 carte._Opportunity.VerifierBonus();
                 String CuriosityAction = carte.Curiosity.DefinirAction();
-                DateTime dt2 = DateTime.Now;
-                TimeSpan span = dt2 - dt1;
-                int ms = (int)span.TotalMilliseconds;
-                Console.Error.WriteLine("TEMPS DE CALCUL 1: " + ms);
                 String OpportunityAction = carte._Opportunity.DefinirAction();
 
                 if (carte.Curiosity.Cible != null && carte._Opportunity.Cible != null && carte.Curiosity.Cible.X == carte._Opportunity.Cible.X && carte.Curiosity.Cible.Y == carte._Opportunity.Cible.Y) //s'ils ont la même cible
@@ -1983,9 +1824,12 @@ protected String PathFinding_CaisseChampignon()
                 }
                 carte.Curiosity.AnciennePosition = new CelluleInconnue(carte.Curiosity._X, carte.Curiosity._Y);
                 carte._Opportunity.AnciennePosition = new CelluleInconnue(carte._Opportunity._X, carte._Opportunity._Y);
+                DateTime dt2 = DateTime.Now;
+                TimeSpan span = dt2 - dt1;
+                int ms = (int)span.TotalMilliseconds;
+                Console.Error.WriteLine("TEMPS DE CALCUL : " + ms);
                 Console.Out.WriteLine(CuriosityAction);
                 Console.Out.WriteLine(OpportunityAction);
-                Carte.GetInstance().MiseAJourCeTour = false;
             }
         }
     }
